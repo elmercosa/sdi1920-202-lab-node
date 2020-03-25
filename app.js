@@ -2,6 +2,9 @@
 let express = require('express');
 let app = express();
 
+let fileUpload = require('express-fileupload');
+app.use(fileUpload());
+
 let mongo = require('mongodb');
 let swig = require('swig');
 let bodyParser = require('body-parser');
