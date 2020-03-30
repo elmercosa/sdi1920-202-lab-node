@@ -1,57 +1,50 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
 
 {% block titulo %} Detalles  {{ cancion.nombre }} {% endblock %}
 
 {% block contenido_principal %}
-	 <div class="row">
-		<div class="media col-xs-10">
-		  <div class="media-left media-middle">
-			<img class="media-object" src="/portadas/{{ cancion._id.toString() }}.png"  >
-		  </div>
-		  <div class="media-body">
-			  <h2>{{ cancion.nombre }}</h2>
-			  <p>{{ cancion.autor }}</p>
-			  <p>{{ cancion.genero }}</p>
-			  <button type="button" class="btn btn-primary pull-right">{{ cancion.precio }} €</button>
-			 <!-- Cambiar el precio por "reproducir" si ya está comprada -->
-		  </div>
-		</div>
-	  </div>
-	  
-	 <!-- -->
-	 <div class="row" style="margin-top: 20px;" >
-		<div class="media col-xs-10">
-			  <div class="media-left media-middle">
-				<a href="#">
-				  <img class="media-object" src="../public/img/user.png" >
-				</a>
-			  </div>
-			  <div class="media-body">
-				<h4 class="media-heading">Middle aligned media</h4>
-				Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-			  </div>
-		  </div>
-		<div class="media col-xs-10">
-			  <div class="media-left media-middle">
-				<a href="#">
-				  <img class="media-object" src="../public/img/user.png" >
-				</a>
-			  </div>
-			  <div class="media-body">
-				<h4 class="media-heading">Middle aligned media</h4>
-				Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-			  </div>
-		  </div>
-		<div class="media col-xs-10">
-			  <div class="media-left media-middle">
-				<a href="#">
-				  <img class="media-object" src="../public/img/user.png" >
-				</a>
-			  </div>
-			  <div class="media-body">
-				<h4 class="media-heading">Middle aligned media</h4>
-				Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-			  </div>
-		  </div>
-	  </div>
+<div class="row">
+    <div class="media col-xs-10">
+        <div class="media-left media-middle">
+            <img class="media-object" src="/portadas/{{ cancion._id.toString() }}.png">
+        </div>
+        <div class="media-body">
+            <h2>{{ cancion.nombre }}</h2>
+            <p>{{ cancion.autor }}</p>
+            <p>{{ cancion.genero }}</p>
+            <button type="button" class="btn btn-primary pull-right">{{ cancion.precio }} €</button>
+            <!-- Cambiar el precio por "reproducir" si ya está comprada -->
+        </div>
+    </div>
+</div>
+
+
+<div class="row mt-3">
+    <div id="custom-search-input ">
+        <form method="post" action="/comentarios/{{ cancion._id.toString() }}">
+            <div class="input-group col-xs-8 col-sm-6 col-md-4 col-lg-5 pull-left">
+                <input type="text" class="search-query form-control" placeholder="Comentario" name="texto"/>
+                <span class="input-group-btn">
+                    <button class="btn" type="submit">
+                        Añadir
+                    </button>
+                </span>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<h2>Comentarios</h2>
+<div class="row" style="margin-top: 20px;">
+    {% for comentario in comentarios %}
+    <div class="media col-xs-10">
+        <div class="media-body">
+            <h4 class="media-heading"> Autor: {{ comentario.autor }}</h4>
+            {{ comentario.texto }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
 {% endblock %}
