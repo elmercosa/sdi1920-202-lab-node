@@ -12,9 +12,23 @@
             <h2>{{ cancion.nombre }}</h2>
             <p>{{ cancion.autor }}</p>
             <p>{{ cancion.genero }}</p>
+            {% if isAutor == true %}
+            <audio controls>
+                <source src="/audios/{{ cancion._id.toString() }}.mp3" type="audio/mpeg">
+            </audio>
+            {% endif %}
+
+            {% if isAutor == false  && isComprada == true %}
+            <audio controls>
+                <source src="/audios/{{ cancion._id.toString() }}.mp3" type="audio/mpeg">
+            </audio>
+            {% endif %}
+            {% if isAutor == false && isComprada == false %}
             <a class="btn btn-primary pull-right"
                href="/cancion/comprar/{{cancion._id.toString()}}">{{ cancion.precio
                 }} €</a>
+            {% endif %}
+
         </div>
     </div>
 </div>
