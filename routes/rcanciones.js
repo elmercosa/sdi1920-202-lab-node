@@ -1,19 +1,5 @@
 module.exports = function (app, swig, gestorBD) {
 
-    // function obtenerCompras(criterio){
-    //     gestorBD.obtenerCompras({"usuario": req.session.usuario}, function (compras) {
-    //         if (compras == null) {
-    //             return false
-    //         } else {
-    //             for (i = 0; i < compras.length; i++) {
-    //                 if(compras[i].cancionId.toString() === req.params.id.toString()){
-    //                     isComprad =  true;
-    //                 }
-    //             }
-    //         }
-    //     });
-    // }
-
 
     app.get('/compras', function (req, res) {
         let criterio = {"usuario": req.session.usuario};
@@ -45,16 +31,16 @@ module.exports = function (app, swig, gestorBD) {
         let isComprad = false;
         gestorBD.obtenerCompras({"usuario": req.session.usuario}, function (compras) {
             if (compras == null) {
-                isComprad =  false;
+                isComprad = false;
             } else {
                 for (i = 0; i < compras.length; i++) {
-                    if(compras[i].cancionId.toString() === req.params.id.toString()){
-                        isComprad =  true;
+                    if (compras[i].cancionId.toString() === req.params.id.toString()) {
+                        isComprad = true;
                     }
                 }
-                if(isComprad){
-                    res.redirect("/canciones/"+req.params.id+"?mensaje=Ya has comprado esta cancion" + "&tipoMensaje=alert-danger ");
-                }else{
+                if (isComprad) {
+                    res.redirect("/canciones/" + req.params.id + "?mensaje=Ya has comprado esta cancion" + "&tipoMensaje=alert-danger ");
+                } else {
                     gestorBD.insertarCompra(compra, function (idCompra) {
                         if (idCompra == null) {
                             res.send(respuesta);
@@ -198,40 +184,56 @@ module.exports = function (app, swig, gestorBD) {
             } else {
                 gestorBD.obtenerComentarios(gestorBD.mongo.ObjectID(req.params.id), function (comentarios) {
                     let isAutor = false;
-                    if(canciones[0].autor  === req.session.usuario){
+                    if (canciones[0].autor === req.session.usuario) {
                         isAutor = true;
                     }
                     let isComprad = false;
                     gestorBD.obtenerCompras({"usuario": req.session.usuario}, function (compras) {
-                        if (compras == null) {
-                            isComprad =  false;
-                        } else {
-                            for (i = 0; i < compras.length; i++) {
-                                if(compras[i].cancionId.toString() === req.params.id.toString()){
-                                    isComprad =  true;
-                                }
-                            }
-                            if (comentarios == null) {
-                                let respuesta = swig.renderFile('views/bcancion.html',
-                                    {
-                                        cancion: canciones[0],
-                                        comentarios: [],
-                                        isAutor: isAutor,
-                                        isComprada: isComprad
-                                    });
-                                res.send(respuesta)
+                            if (compras == null) {
+                                isComprad = false;
                             } else {
-                                let respuesta = swig.renderFile('views/bcancion.html',
-                                    {
-                                        cancion: canciones[0],
-                                        comentarios: comentarios,
-                                        isAutor: isAutor,
-                                        isComprada: isComprad
-                                    });
-                                res.send(respuesta);
+                                var configuracion = {
+                                    url: "https://api.exchangeratesapi.io/latest?base=EUR",
+                                    method: "get",
+                                    headers: {"token": "ejemplo",}
+                                };
+                                var rest = app.get("rest");
+                                rest(configuracion, function (error, response, body) {
+                                    console.log("cod: " + response.statusCode + " Cuerpo :" + body);
+                                    var objetoRespuesta = JSON.parse(body);
+                                    var cambioUSD = objetoRespuesta.rates.USD; // nuevo campo "usd"
+                                    canciones[0].usd = cambioUSD * canciones[0].precio;
+
+                                    for (i = 0; i < compras.length; i++) {
+                                        if (compras[i].cancionId.toString() === req.params.id.toString()) {
+                                            isComprad = true;
+                                        }
+                                    }
+                                    if (comentarios == null) {
+                                        let respuesta = swig.renderFile('views/bcancion.html',
+                                            {
+                                                cancion: canciones[0],
+                                                comentarios: [],
+                                                isAutor: isAutor,
+                                                isComprada: isComprad
+                                            });
+                                        res.send(respuesta)
+                                    } else {
+                                        let respuesta = swig.renderFile('views/bcancion.html',
+                                            {
+                                                cancion: canciones[0],
+                                                comentarios: comentarios,
+                                                isAutor: isAutor,
+                                                isComprada: isComprad
+                                            });
+                                        res.send(respuesta);
+                                    }
+
+
+                                });
                             }
                         }
-                    });
+                    );
                 })
             }
         });

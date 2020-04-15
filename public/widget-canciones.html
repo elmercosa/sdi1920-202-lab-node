@@ -1,4 +1,6 @@
 <div id="widget-canciones" >
+    <input type="text" class="form-control" placeholder="Filtrar por nombre"
+           id="filtro-nombre"/>
     <button class="btn" onclick="cargarCanciones()" >Actualizar</button>
     <button class="btn btn-primary" onclick="widgetAgregar()">Nueva Canción</button>
     <table class="table table-hover">
@@ -76,4 +78,16 @@
     function widgetAgregar() {
         $( "#contenedor-principal" ).load( "widget-agregar.html");
     }
+
+    $('#filtro-nombre').on('input',function(e){
+        var cancionesFiltradas = [];
+        var nombreFiltro = $("#filtro-nombre").val();
+
+        for (i = 0; i < canciones.length; i++) {
+            if (canciones[i].nombre.indexOf(nombreFiltro) != -1 ){
+                cancionesFiltradas.push(canciones[i]);
+            }
+        }
+        actualizarTabla(cancionesFiltradas);
+    });
 </script>
