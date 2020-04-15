@@ -2,8 +2,24 @@
 let express = require('express');
 let app = express();
 
+let os = require('os');
+let puerto = 3000;
+
+app.get('/memoria', function (req, res) {
+    setTimeout(function () { // Espera de 10 segundos
+        console.log(os.freemem());
+        var memoriaLibre = os.freemem() / 1000000; //pasar a MB
+        res.status(200);
+        res.json({memoria: memoriaLibre});
+    }, 10000);
+});
+
+app.listen(puerto, function () {
+    console.log("Servidor listo " + puerto);
+});
+
 let rest = require('request');
-app.set('rest',rest);
+app.set('rest', rest);
 
 var jwt = require('jsonwebtoken');
 app.set('jwt', jwt);
@@ -43,16 +59,16 @@ let gestorBD = require("./modules/gestorBD.js");
 gestorBD.init(app, mongo);
 
 var routerUsuarioToken = express.Router();
-routerUsuarioToken.use(function(req, res, next) {
+routerUsuarioToken.use(function (req, res, next) {
     // obtener el token, vía headers (opcionalmente GET y/o POST).
     var token = req.headers['token'] || req.body.token || req.query.token;
     if (token != null) {
         // verificar el token
-        jwt.verify(token, 'secreto', function(err, infoToken) {
-            if (err || (Date.now()/1000 - infoToken.tiempo) > 240 ){
+        jwt.verify(token, 'secreto', function (err, infoToken) {
+            if (err || (Date.now() / 1000 - infoToken.tiempo) > 240) {
                 res.status(403); // Forbidden
                 res.json({
-                    acceso : false,
+                    acceso: false,
                     error: 'Token invalido o caducado'
                 });
                 // También podríamos comprobar que intoToken.usuario existe
@@ -68,7 +84,7 @@ routerUsuarioToken.use(function(req, res, next) {
     } else {
         res.status(403); // Forbidden
         res.json({
-            acceso : false,
+            acceso: false,
             mensaje: 'No hay Token'
         });
     }
