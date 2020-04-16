@@ -22,6 +22,9 @@
 <script>
     window.history.pushState("", "", "/cliente.html?w=canciones");
     var canciones;
+    let isSortedByPriceASC = true;
+    let isSortedByNameASC = true;
+
 
     function cargarCanciones() {
         $.ajax({
@@ -99,20 +102,43 @@
     });
 
     function ordenarPorPrecio() {
-        canciones.sort(function (a, b) {
-            if (parseFloat(a.precio) > parseFloat(b.precio)) return -1;
-            if (parseFloat(a.precio) < parseFloat(b.precio)) return 1;
-            return 0 // Dependiendo de retorno >0 =0 o <0
-        });
-        actualizarTabla(canciones);
+        if(isSortedByPriceASC){
+            canciones.sort(function (a, b) {
+                if (parseFloat(a.precio) > parseFloat(b.precio)) return -1;
+                if (parseFloat(a.precio) < parseFloat(b.precio)) return 1;
+                return 0 // Dependiendo de retorno >0 =0 o <0
+            });
+            actualizarTabla(canciones);
+            isSortedByPriceASC = false;
+        }else{
+            canciones.sort(function (a, b) {
+                if (parseFloat(a.precio) < parseFloat(b.precio)) return -1;
+                if (parseFloat(a.precio) > parseFloat(b.precio)) return 1;
+                return 0 // Dependiendo de retorno >0 =0 o <0
+            });
+            actualizarTabla(canciones);
+            isSortedByPriceASC = true;
+        }
     }
 
     function ordenarPorNombre() {
-        canciones.sort(function (a, b) {
-            if (a.nombre > b.nombre) return 1;
-            if (a.nombre < b.nombre) return -1;
-            return 0;
-        });
-        actualizarTabla(canciones);
+        if(isSortedByNameASC){
+            canciones.sort(function (a, b) {
+                if (a.nombre > b.nombre) return 1;
+                if (a.nombre < b.nombre) return -1;
+                return 0;
+            });
+            actualizarTabla(canciones);
+            isSortedByNameASC = false;
+        }else{
+            canciones.sort(function (a, b) {
+                if (a.nombre < b.nombre) return 1;
+                if (a.nombre > b.nombre) return -1;
+                return 0;
+            });
+            actualizarTabla(canciones);
+            isSortedByNameASC = true;
+        }
+
     }
 </script>

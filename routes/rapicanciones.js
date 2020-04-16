@@ -32,15 +32,32 @@ module.exports = function (app, gestorBD) {
     app.delete("/api/cancion/:id", function (req, res) {
         var criterio = {"_id": gestorBD.mongo.ObjectID(req.params.id)};
 
-        gestorBD.eliminarCancion(criterio, function (canciones) {
+        gestorBD.obtenerCanciones(criterio, function (canciones) {
             if (canciones == null) {
                 res.status(500);
                 res.json({
                     error: "se ha producido un error"
                 })
             } else {
-                res.status(200);
-                res.send(JSON.stringify(canciones));
+                if (canciones[0].autor == res.usuario) {
+                    gestorBD.eliminarCancion(criterio, function (canciones) {
+                        if (canciones == null) {
+                            res.status(500);
+                            res.json({
+                                error: "se ha producido un error"
+                            })
+                        } else {
+                            res.status(200);
+                            res.send(JSON.stringify(canciones));
+                        }
+                    });
+                } else {
+                    res.status(500);
+                    res.json({
+                        error: "No es el dueño de la cancion"
+                    })
+                }
+
             }
         });
     });
@@ -52,22 +69,52 @@ module.exports = function (app, gestorBD) {
             precio: req.body.precio,
         };
         // ¿Validar nombre, genero, precio?
+        let error = "";
 
-        gestorBD.insertarCancion(cancion, function (id) {
-            if (id == null) {
-                res.status(500);
-                res.json({
-                    error: "se ha producido un error"
-                })
-            } else {
-                res.status(201);
-                res.json({
-                    mensaje: "canción insertarda",
-                    _id: id
-                })
-            }
-        });
+        if (req.body.nombre == null || req.body.nombre.trim().length < 5 || req.body.nombre.trim().length > 30)
+            error += "El nombre de la cancion tiene que tener entre 5 y 30 caracteres.";
+        if (req.body.genero == null || req.body.genero.trim().length < 5 || req.body.genero.trim().length > 30)
+            error += "El genero de la cancion tiene que tener entre 5 y 30 caracteres.";
+        if (req.body.precio == null || req.body.precio < 0)
+            error += "El precio de la cancion tiene que ser mayor que 0.";
 
+        if (error.length != 0) {
+            res.status(500);
+            res.json({
+                error: error
+            })
+        } else {
+            gestorBD.obtenerCanciones(criterio, function (canciones) {
+                if (canciones == null) {
+                    res.status(500);
+                    res.json({
+                        error: "se ha producido un error"
+                    })
+                } else {
+                    if (canciones[0].autor == res.usuario) {
+                        gestorBD.insertarCancion(cancion, function (id) {
+                            if (id == null) {
+                                res.status(500);
+                                res.json({
+                                    error: "se ha producido un error"
+                                })
+                            } else {
+                                res.status(201);
+                                res.json({
+                                    mensaje: "canción insertarda",
+                                    _id: id
+                                })
+                            }
+                        });
+                    } else {
+                        res.status(500);
+                        res.json({
+                            error: "No es el dueño de la cancion"
+                        })
+                    }
+                }
+            });
+        }
     });
 
     app.put("/api/cancion/:id", function (req, res) {
@@ -81,20 +128,37 @@ module.exports = function (app, gestorBD) {
             cancion.genero = req.body.genero;
         if (req.body.precio != null)
             cancion.precio = req.body.precio;
-        gestorBD.modificarCancion(criterio, cancion, function (result) {
-            if (result == null) {
-                res.status(500);
-                res.json({
-                    error: "se ha producido un error"
-                })
-            } else {
-                res.status(200);
-                res.json({
-                    mensaje: "canción modificada",
-                    _id: req.params.id
-                })
-            }
-        });
+
+        let error = "";
+
+        if (req.body.nombre != null && (req.body.nombre.trim().length < 5 || req.body.nombre.trim().length > 30))
+            error += "El nombre de la cancion tiene que tener entre 5 y 30 caracteres.";
+        if (req.body.genero != null && (req.body.genero.trim().length < 5 || req.body.genero.trim().length > 30))
+            error += "El genero de la cancion tiene que tener entre 5 y 30 caracteres.";
+        if (req.body.precio != null && req.body.precio < 0)
+            error += "El precio de la cancion tiene que ser mayor que 0.";
+
+        if (error.length != 0) {
+            res.status(500);
+            res.json({
+                error: error
+            })
+        } else {
+            gestorBD.modificarCancion(criterio, cancion, function (result) {
+                if (result == null) {
+                    res.status(500);
+                    res.json({
+                        error: "se ha producido un error"
+                    })
+                } else {
+                    res.status(200);
+                    res.json({
+                        mensaje: "canción modificada",
+                        _id: req.params.id
+                    })
+                }
+            });
+        }
     });
 
     app.post("/api/autenticar/", function (req, res) {
@@ -109,12 +173,12 @@ module.exports = function (app, gestorBD) {
                 res.status(401);
                 res.json({autenticado: false});
             } else {
-                var token = app.get('jwt').sign({usuario:criterio.email, tiempo:Date.now()/1000}, "secreto");
+                var token = app.get('jwt').sign({usuario: criterio.email, tiempo: Date.now() / 1000}, "secreto");
                 res.status(200);
                 res.json({autenticado: true, token: token});
             }
         })
 
-    })
+    });
 
 };
